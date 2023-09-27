@@ -151,4 +151,3 @@ plt.colorbar(im, ax=ax)
 figfile = 'plot_del2GradVort_nx{:04d}'.format(N)+'.png'
 plt.savefig(figfile) #, bbox_inches='tight')
 plt.close()
-

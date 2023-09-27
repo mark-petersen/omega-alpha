@@ -1,5 +1,9 @@
 // Using netcdf-c version of the netcdf libraries, and all
 // arrays are c++ vector containers, 1D with computed index offset
+// Mesh Generation instructions:
+//   planar_hex --nx 16 --ny 16 --dc 64000 -o base_mesh_16x16.nc
+//   MpasMeshConverter.x base_mesh_16x16.nc mpas_mesh_16x16.nc
+// See script in mesh directory.
 
 #include "Mesh.h"
 #include "Config.h"

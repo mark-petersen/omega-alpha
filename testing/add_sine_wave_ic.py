@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 from __future__ import absolute_import, division, print_function, unicode_literals
 """
-Plot vertical profiles from individual columns
+Create idealized sine-wave initial conditions for Omega
 Mark Petersen
-September 2022
+September 2023
 """
 
 ############################## model files, run dirs
@@ -18,10 +18,7 @@ import numpy as np
 
 for p in range(4,5):
     N = 2**p
-# for convergence tests:
-    #dc = 64.0e3*16.0/N
-# for heat eqn tests:
-    dc = 30.0e3
+    dc = 64.0e3*16.0/N
     print('N',N)
     print('dc',dc)
     nx = N
@@ -35,7 +32,7 @@ for p in range(4,5):
 
     #from netCDF4 import Dataset
     mesh = xr.open_dataset(runDir+fileName)
-    
+
     nCells = mesh.dims['nCells']
     xCell = mesh.variables['xCell']
     yCell = mesh.variables['yCell']
@@ -46,7 +43,7 @@ for p in range(4,5):
     nVertices = mesh.dims['nVertices']
     xVertex = mesh.variables['xVertex']
     yVertex = mesh.variables['yVertex']
-    
+
     zonalVelocityEdge = np.zeros([nEdges,nVertLevels])
     meridionalVelocityEdge = np.zeros([nEdges,nVertLevels])
     normalVelocity = np.zeros([nEdges,nVertLevels])
@@ -56,7 +53,7 @@ for p in range(4,5):
     del2GradDivVelocitySol = np.zeros([nEdges,nVertLevels])
     del2GradVortVelocitySol = np.zeros([nEdges,nVertLevels])
     del2VelocitySol = np.zeros([nEdges,nVertLevels])
-    
+
     xmin = min(xEdge)
     ymin = min(yEdge)
     k=0
@@ -64,7 +61,7 @@ for p in range(4,5):
     IC=5
     # Create initial conditions for sin(x)*sin(y)
     if IC==1:
-        kux=1; kuy=2; kvx=2; kvy=3; 
+        kux=1; kuy=2; kvx=2; kvy=3;
         u = np.sin( kux*pi2/Lx*(xEdge[:] - xmin) ) * \
             np.sin( kuy*pi2/Ly*(yEdge[:] - ymin) )
         v = np.sin( kvx*pi2/Lx*(xEdge[:] - xmin) ) * \
@@ -111,11 +108,11 @@ for p in range(4,5):
         uyC=kuy*pi2/Ly* \
             np.cos( kuy*pi2/Ly*yCell[:] )
         vxC=kvx*pi2/Lx* \
-            np.cos( kvx*pi2/Lx*xCell[:] ) 
+            np.cos( kvx*pi2/Lx*xCell[:] )
         uyV=kuy*pi2/Ly* \
             np.cos( kuy*pi2/Ly*yVertex[:] )
         vxV=kvx*pi2/Lx* \
-            np.cos( kvx*pi2/Lx*xVertex[:] ) 
+            np.cos( kvx*pi2/Lx*xVertex[:] )
         uxy = kux*pi2/Lx * kuy*pi2/Ly * \
             np.cos( kux*pi2/Lx*xEdge[:] ) * \
             np.cos( kuy*pi2/Ly*yEdge[:] )
@@ -250,9 +247,9 @@ for p in range(4,5):
     normalVelocity[:,k] = \
           np.cos(angleEdge[:]) * u \
         + np.sin(angleEdge[:]) * v
-    
+
     # Create exact solutions:
-    
+
     divergenceSol[:,k] = ux + vy
     relativeVorticitySol[:,k] = vxV - uyV
     relativeVorticityCellSol[:,k] = vxC - uyC
@@ -265,7 +262,7 @@ for p in range(4,5):
     del2VelocitySol[:,k] = \
           np.cos(angleEdge[:]) * (uxx + uyy) \
         + np.sin(angleEdge[:]) * (vxx + vyy)
-    
+
     print('ln -isf '+newFileName+' init.nc; srun -n 1 ocean_model; python plot_results.py >> results.txt')
     #mesh.expand_dims({'nVertLevels':nVertLevels})
     mesh["zonalVelocityEdge"]=(['nEdges','nVertLevels'], zonalVelocityEdge)
@@ -277,7 +274,7 @@ for p in range(4,5):
     mesh["del2GradDivVelocitySol"]=(['nEdges','nVertLevels'], del2GradDivVelocitySol)
     mesh["del2GradVortVelocitySol"]=(['nEdges','nVertLevels'], del2GradVortVelocitySol)
     mesh["del2VelocitySol"]=(['nEdges','nVertLevels'], del2VelocitySol)
-    
+
     H = 1000.0
     maxLevelCell = np.ones([nCells],dtype=np.int32); mesh["maxLevelCell"]=(['nCells'], maxLevelCell)
     refBottomDepth = H*np.ones([nVertLevels]); mesh["refBottomDepth"]=(['nVertLevels'], refBottomDepth)
@@ -285,7 +282,7 @@ for p in range(4,5):
     layerThickness = H*np.ones([nCells,nVertLevels]); mesh["layerThickness"]=(['nCells','nVertLevels'], layerThickness)
     restingThickness = H*np.ones([nCells,nVertLevels]); mesh["restingThickness"]=(['nCells','nVertLevels'], restingThickness)
     vertCoordMovementWeights = np.ones([nVertLevels],dtype=np.int32); mesh["vertCoordMovementWeights"]=(['nVertLevels'], vertCoordMovementWeights)
-    
+
     mesh.to_netcdf(path=runDir+newFileName)
 
 exit()

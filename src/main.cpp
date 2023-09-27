@@ -14,7 +14,8 @@
 // in a very simple setting. The design of all Omega versions and the model
 // equations may be found at:
 // https://github.com/E3SM-Project/Omega/blob/develop/components/omega/doc/design/ShallowWaterOmega0.md
-// Mark Petersen, LANL, August 2023
+// Mesh generation instructions in Mesh.cpp
+//
 // Copyright (c) 2023, Mark Petersen
 // All rights reserved.
 // This source code is licensed under the BSD-style license found in the
